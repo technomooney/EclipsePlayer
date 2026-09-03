@@ -6,3 +6,4 @@ riderModule.iml
 /context md files
 .idea/
 *.user
+.vs/

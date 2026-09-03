@@ -4,4 +4,13 @@
         <LangVersion>latest</LangVersion>
         <WarningsAsErrors>nullable</WarningsAsErrors>
     </PropertyGroup>
+
+    <!-- Supply-chain: scan direct and transitive packages against the GitHub
+         Advisory Database on restore, and fail the build on high/critical. -->
+    <PropertyGroup>
+        <NuGetAudit>true</NuGetAudit>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
+        <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+    </PropertyGroup>
 </Project>

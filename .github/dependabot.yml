@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Don't propose a version until it has been public for a while — the early
+    # days after a release are the main supply-chain-attack window.
+    cooldown:
+      default-days: 14
+      semver-major-days: 30
+    groups:
+      avalonia:
+        patterns:
+          - "Avalonia*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14

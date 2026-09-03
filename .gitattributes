@@ -1,0 +1,36 @@
+# Normalize line endings: check out and commit with LF everywhere.
+* text=auto eol=lf
+
+# Explicitly text
+*.cs        text
+*.csproj    text
+*.slnx      text
+*.props     text
+*.targets   text
+*.axaml     text
+*.xaml      text
+*.xml       text
+*.json      text
+*.md        text
+*.yml       text
+*.yaml      text
+*.editorconfig text
+*.manifest  text
+*.plist     text
+*.xib       text
+
+# Binary — never touch line endings, don't diff as text
+*.png       binary
+*.ico       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.wav       binary
+*.mp3       binary
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+*.dll       binary
+*.so        binary
+*.dylib     binary

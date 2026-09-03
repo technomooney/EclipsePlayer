@@ -140,6 +140,18 @@ real name and match your Git identity. To add sign-off to the last commit:
   UI framework. Keep the dependency direction intact:
   `EclipsePlayer → Engine → { Funscript, IO, Hal, Media }`, `IO → Funscript`.
 
+### Dependencies
+
+- A new or upgraded NuGet package must be **at least 14 days old** when the PR is
+  opened. The early days after a release are the main supply-chain-attack window
+  (a malicious version is published, then pulled once caught). Dependabot applies
+  this cooldown automatically; manual additions must respect it too.
+- `NuGetAudit` runs on restore and the build fails on high/critical advisories in
+  direct or transitive packages. Don't suppress an advisory to get a build
+  through — resolve or replace the dependency.
+- Add a dependency only when it clearly earns its place. More packages is more
+  attack surface.
+
 ## Submitting a pull request
 
 1. Fork and branch from the default branch.
