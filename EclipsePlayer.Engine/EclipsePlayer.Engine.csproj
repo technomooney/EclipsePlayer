@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\EclipsePlayer.Funscript\EclipsePlayer.Funscript.csproj" />
+    <ProjectReference Include="..\EclipsePlayer.IO\EclipsePlayer.IO.csproj" />
+    <ProjectReference Include="..\EclipsePlayer.Hal\EclipsePlayer.Hal.csproj" />
+    <ProjectReference Include="..\EclipsePlayer.Media\EclipsePlayer.Media.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

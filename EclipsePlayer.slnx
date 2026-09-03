@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="EclipsePlayer.Desktop/EclipsePlayer.Desktop.csproj" />
+  <Project Path="EclipsePlayer.Engine/EclipsePlayer.Engine.csproj" />
+  <Project Path="EclipsePlayer.Funscript/EclipsePlayer.Funscript.csproj" />
+  <Project Path="EclipsePlayer.Hal/EclipsePlayer.Hal.csproj" />
+  <Project Path="EclipsePlayer.IO/EclipsePlayer.IO.csproj" />
+  <Project Path="EclipsePlayer.Media/EclipsePlayer.Media.csproj" />
+  <Project Path="EclipsePlayer/EclipsePlayer.csproj" />
+</Solution>
