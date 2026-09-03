@@ -45,6 +45,9 @@ dotnet run --project EclipsePlayer.Desktop
 Aims for feature parity with, and improvement on, XTPlayer and the developer's own
 ScriptPlayer+ fork — reimplemented natively in C# rather than ported.
 
+See [`ROADMAP.md`](ROADMAP.md) for the planned direction (a direction, not a
+commitment — early development, expect churn).
+
 ## Development
 
 This is a personal learning project. Application code is written by the developer,
