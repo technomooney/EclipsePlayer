@@ -53,28 +53,46 @@ messages, and project scaffolding/configuration.
 
 ## License
 
-**GPL-3.0-or-later** — full text in [`LICENSE`](LICENSE).
+EclipsePlayer is multi-licensed by project. Full texts are in [`LICENSES/`](LICENSES/);
+the root [`LICENSE`](LICENSE) is the GPL-3.0-or-later text that covers the application.
 
-This is driven by the media backend: EclipsePlayer intends to use libmpv, which is
-GPLv2-or-later unless specially built as LGPL, and releases will bundle the backend
-rather than rely on a system copy, so the combined work is copyleft. Staying GPLv3
-also keeps EclipsePlayer in the same license family as XTPlayer and ScriptPlayer. If
-the media backend ends up being LibVLC (LGPL) instead, a permissive license for the
-whole project would become feasible.
+| Project | License |
+|---|---|
+| `EclipsePlayer.Hal` | MPL-2.0 |
+| `EclipsePlayer.Funscript` | MPL-2.0 |
+| `EclipsePlayer.IO` | GPL-3.0-or-later |
+| `EclipsePlayer.Engine` | GPL-3.0-or-later |
+| `EclipsePlayer.Media` | GPL-3.0-or-later |
+| `EclipsePlayer` (application / UI) | GPL-3.0-or-later |
 
-The lower libraries (`Funscript`, `IO`, `Hal`, `Engine`) have no backend dependency
-and may additionally be offered under a permissive license later if there is demand
-for reuse.
+`Hal` and `Funscript` are **MPL-2.0** so they can be reused in proprietary software,
+while improvements to their own source files must be published under MPL-2.0. `Hal`
+is a device/transport abstraction intended to outlive this repo as a standalone
+library; `Funscript` validates parsed data against the funscript standard as of the
+release and presents a clean, read-only dataset to consumers.
+
+The rest is **GPL-3.0-or-later**, driven by the media backend: libmpv is GPLv2-or-later
+unless specially built as LGPL, and releases bundle it. MPL-2.0 is GPL-compatible, so
+the GPL projects consume the MPL ones without issue; the distributed player is a
+GPL-3.0-or-later work with the MPL-2.0 files remaining under MPL-2.0 within it.
+
+Player extension scripts run through the extension API and are the script author's
+own work under any license — they are not derivative works of EclipsePlayer.
 
 ### Source file headers
 
-Each source file carries a two-line [SPDX](https://spdx.dev/) header instead of the
-full GPL notice block. For `.cs` files:
+Every source file carries a two-line [SPDX](https://spdx.dev/) header. In the MPL-2.0
+projects:
 
 ```csharp
 // SPDX-FileCopyrightText: 2026 Marty Mooney
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 ```
 
-For XML-family files (`.axaml`, `.csproj`, `.props`) use an XML comment with the same
-two lines. Generated files and the template scaffolding are exempt.
+The GPL-3.0-or-later projects use `GPL-3.0-or-later` in place of `MPL-2.0`. XML-family
+files (`.axaml`, `.csproj`, `.props`) use an XML comment with the same two lines.
+Generated files and the template scaffolding are exempt.
+
+Contributions are accepted inbound = outbound: a contribution is licensed under the
+license of the project it lands in. A `CONTRIBUTING.md` with a DCO sign-off flow is
+still to be added.
