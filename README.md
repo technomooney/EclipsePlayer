@@ -93,6 +93,11 @@ The GPL-3.0-or-later projects use `GPL-3.0-or-later` in place of `MPL-2.0`. XML-
 files (`.axaml`, `.csproj`, `.props`) use an XML comment with the same two lines.
 Generated files and the template scaffolding are exempt.
 
-Contributions are accepted inbound = outbound: a contribution is licensed under the
-license of the project it lands in. A `CONTRIBUTING.md` with a DCO sign-off flow is
-still to be added.
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). In short: contributions are inbound =
+outbound (licensed under the project they land in), require a DCO `Signed-off-by`
+line, and carry a bounded grant letting the maintainers re-release them under any
+OSI-approved open-source license (never proprietary). Contributors keep their
+copyright. AI-assisted or AI-generated contributions are allowed but must be
+disclosed and marked.
