@@ -29,8 +29,11 @@ TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Fu
 
 TODO: IO — read a .funscript file into the parsed representation Funscript validates
 TODO: IO — normalization layer for messy real-world funscript files (best-effort cleanup before handoff)
-TODO: IO — multi-axis: read 1.1 `axes` array (target) + 2.0 `channels` + classic separate-suffix files (name.roll.funscript)
-TODO: IO — axis key map: canonical = TCode id (L0/L1/L2/R0/R1/R2/A1); accept TCode or name on input; user-overridable
+TODO: IO — multi-axis OUTPUT = 1.1 `axes` array, ids = semantic names, top-level actions always = L0/stroke; optional classic sidecar export
+TODO: IO — multi-axis READ: 1.1 `axes` + 2.0 `channels` + classic separate-suffix files
+TODO: IO — canonical axis identity = semantic name (stroke/surge/sway/twist/roll/pitch/suck...), NOT TCode; value-type-over-string, unknown names pass through
+TODO: IO — versioned inbound map for files that use TCode ids in axes[].id (L0->stroke etc.), normalize to names on read
+TODO: Hal — TCode name->channel map lives ONLY in the device adapter, parameterized by dialect/version + device model
 TODO: IO — media + script folder scanning; script <-> video matching
 TODO: Media — run the libmpv embed spike on the CachyOS box BEFORE any Media code (see memory: media-backend)
 TODO: Media — define IMediaPlayer minimally against one working mpv implementation; keep the video-surface control a separate factory/ViewLocator seam
@@ -41,7 +44,7 @@ TODO: Engine — dedicated high-priority thread + System.Threading.Channels (def
 
 ## Open architecture questions (decide when the relevant lib is built)
 
-TODO: funscript axis key naming — RESOLVED: canonical internal key = TCode id (see IO tasks + memory funscript-format-findings)
+TODO: funscript axis key naming — RESOLVED: canonical = semantic name, never TCode; TCode confined to Hal device adapter (see IO/Hal tasks + memory funscript-format-findings)
 TODO: eager vs lazy multi-axis load
 TODO: data virtualization strategy for large library views in Avalonia
 TODO: plugin/extension loading mechanism — Lua vs out-of-process Python (see memory: extension-scripting)
