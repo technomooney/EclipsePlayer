@@ -19,8 +19,9 @@ TODO: Funscript — immutable AxisScript holding a sorted ImmutableArray<Funscri
 TODO: Funscript — factory: take parsed representation, sort + validate, return built object OR a structured list of validation errors
 TODO: Funscript — GetActionAt(TimeSpan) via binary search; return the bracketing pair
 TODO: Funscript — decide whether interpolation lives here or in Engine
-TODO: Funscript — DECISION: strict-reject vs best-effort-normalize. Leaning: Funscript validates strictly + reports; messy-file cleanup lives in IO
+TODO: Funscript — RESOLVED: strict validator = base-1.0 WRITE contract (int ms, unique strictly-increasing at, pos 0-100); float/unsorted/dupe/negative handling lives in IO normalization + warnings
 TODO: Funscript — tests first: boundaries, midpoints, before-first, after-last, empty, single-action
+TODO: write docs/funscript-format.md — pin to Eroscripts/OFS@<commit> + RFC 267449 (no formal spec exists); see memory funscript-format-findings
 TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Funscript)
 
 
@@ -28,6 +29,8 @@ TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Fu
 
 TODO: IO — read a .funscript file into the parsed representation Funscript validates
 TODO: IO — normalization layer for messy real-world funscript files (best-effort cleanup before handoff)
+TODO: IO — multi-axis: read 1.1 `axes` array (target) + 2.0 `channels` + classic separate-suffix files (name.roll.funscript)
+TODO: IO — axis key map: canonical = TCode id (L0/L1/L2/R0/R1/R2/A1); accept TCode or name on input; user-overridable
 TODO: IO — media + script folder scanning; script <-> video matching
 TODO: Media — run the libmpv embed spike on the CachyOS box BEFORE any Media code (see memory: media-backend)
 TODO: Media — define IMediaPlayer minimally against one working mpv implementation; keep the video-surface control a separate factory/ViewLocator seam
@@ -38,7 +41,7 @@ TODO: Engine — dedicated high-priority thread + System.Threading.Channels (def
 
 ## Open architecture questions (decide when the relevant lib is built)
 
-TODO: funscript axis key naming — raw filename strings vs T-Code IDs
+TODO: funscript axis key naming — RESOLVED: canonical internal key = TCode id (see IO tasks + memory funscript-format-findings)
 TODO: eager vs lazy multi-axis load
 TODO: data virtualization strategy for large library views in Avalonia
 TODO: plugin/extension loading mechanism — Lua vs out-of-process Python (see memory: extension-scripting)
