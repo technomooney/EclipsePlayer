@@ -4,33 +4,39 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-09
+Last updated: 2026-09-09 (end of session — building the Funscript model, one type at a time, teaching pace)
 
 
-## NOW — first backend: EclipsePlayer.Funscript
+## DONE this session
 
-Rationale: no internal deps, no native interop, no async/threading. Scope is fixed
-(validate parsed data against the spec, expose a read-only queryable dataset).
-Everything on the haptics side sits on top of it.
+DONE: EclipsePlayer.Funscript/FORMAT.md — pinned format spec (base 1.0, strict/lenient contract, multi-axis 1.1 axes, semantic axis names, inbound TCode map)
+DONE: 22 synthetic test fixtures in EclipsePlayer.Funscript.Tests/TestData/ (+ README = strict/lenient outcome matrix). Real tool exports to be added later under a corpus/ dir.
+DONE: EclipsePlayer.Funscript.Tests wired — xUnit, CPM-clean, ProjectReference to Funscript, TestData copies to output, in EclipsePlayer.slnx. Builds green, 0 tests.
+DONE: Model/FunscriptAction.cs — `readonly record struct FunscriptAction(int AtMilliSecond, int Position)`. Timestamp is int ms (NOT double — see funscript-format-findings memory).
+DONE: Model/AxisName.cs — `readonly record struct AxisName(string Name)` + static known members (Stroke/Surge/Sway/Twist/Roll/Pitch/Suck) + `From(string raw)` (trim, ToLowerInvariant, switch-expression TCode map L0..A1 -> names, unknown passes through).
 
-DONE: EclipsePlayer.Funscript/FORMAT.md — the pinned format spec (base 1.0, strict/lenient contract, multi-axis 1.1 axes, semantic axis names, inbound TCode map)
-TODO: assemble a real .funscript test corpus in EclipsePlayer.Funscript.Tests/TestData: OFS export, classic ScriptPlayer, Handy download, a multi-axis set (separate files + a 1.1 axes single-file), plus messy ones (float at, unsorted, dupe at, negative at, missing wrapper fields, empty actions, BOM)
-TODO: add the solution test project — recommend xUnit, solution-wide — and wire it into EclipsePlayer.slnx
-TODO: confirm Funscript needs ZERO NuGet (System.Text.Json / System.Collections.Immutable / System.Buffers are in-box on net10) — keep Directory.Packages.props untouched for it
-TODO: EclipsePlayer.Funscript.csproj — add PackageLicenseExpression=MPL-2.0, IsPackable=false, GenerateDocumentationFile=true
-TODO: drop a LICENSE (MPL-2.0) into EclipsePlayer.Funscript/ so the license is unambiguous if the project is ever extracted
-TODO: sketch internal layout before scattering files: Model/ (Document, AxisScript, Action, Metadata), Axes/ (AxisName + constants + alias map), Parsing/ (Reader, Options, Result, probe), Serialization/ (writer); internal the JSON DTOs
-TODO: Funscript — immutable FunscriptAction (timestamp + position)
-TODO: Funscript — immutable AxisScript holding a sorted ImmutableArray<FunscriptAction> + metadata (range, inverted, axis name)
-TODO: Funscript — AxisName value-type-over-string + known constants; unknown names pass through
-TODO: Funscript — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
-TODO: Funscript — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize) option; takes bytes/stream, NEVER a file path
-TODO: Funscript — strict contract = base-1.0 WRITE rules (int ms, unique strictly-increasing at, pos 0-100); lenient coerces float/unsorted/dupe/negative + emits warnings
-TODO: Funscript — versioned inbound TCode->name alias map (L0->stroke etc.) lives HERE, not IO
-TODO: Funscript — GetActionAt(TimeSpan) via binary search; return the bracketing pair
-TODO: Funscript — decide whether interpolation lives here or in Engine
-TODO: Funscript — tests first: boundaries, midpoints, before-first, after-last, empty, single-action
-TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Funscript)
+Uncommitted at session end: FunscriptAction.cs, AxisName.cs, Funscript.cs stub (Marty's code — his to commit). Also his App.axaml / MainViewModel.cs WIP.
+
+
+## RESUME HERE — next single step
+
+TODO: Model/AxisScript.cs — `public sealed record AxisScript(AxisName Axis, bool Inverted, int Range, ImmutableArray<FunscriptAction> Actions);` + `using System.Collections.Immutable;`. New concept: ImmutableArray (read-only list). Build green.
+
+
+## Then, in order (Funscript model + parser)
+
+TODO: Model/FunscriptMetadata.cs — recognized keys typed (Duration = double seconds, per OFS commit 99609f7) + raw bag for the rest; never rejects
+TODO: Model/FunscriptDocument.cs — Stroke (AxisScript for top-level actions) + ImmutableArray<AxisScript> for the others + Metadata
+TODO: smoke test — hand-build a FunscriptDocument in a [Fact], assert a property; proves the model is usable. First green test.
+TODO: Parsing — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
+TODO: Parsing — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize); takes bytes/stream, NEVER a file path
+TODO: Parsing — strict = base-1.0 write rules (int ms, unique strictly-increasing at, pos 0-100); lenient coerces float/unsorted/dupe/negative + warnings. TDD against the fixture folders (flat-1.0-minimal -> flat-1.0-full -> lenient/ as a [Theory] -> multi-axis).
+TODO: Query — GetActionAt(TimeSpan) on AxisScript via binary search; return the bracketing pair. Own [Theory]: before-first, after-last, exact hit, between, empty, single.
+TODO: decide whether interpolation lives in Funscript or Engine (FORMAT.md §9)
+TODO: Serialization — model -> JSON: single-file 1.1 `axes` output, ids = semantic names, top-level actions always = stroke
+TODO: EclipsePlayer.Funscript.csproj — PackageLicenseExpression=MPL-2.0, IsPackable=false, GenerateDocumentationFile=true
+TODO: drop LICENSE (MPL-2.0) into EclipsePlayer.Funscript/
+TODO: keep SPDX headers on every new .cs (AxisName.cs had lost its once — watch for it)
 
 
 ## Backend build sequence (after Funscript)
