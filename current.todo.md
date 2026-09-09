@@ -13,7 +13,13 @@ Rationale: no internal deps, no native interop, no async/threading. Scope is fix
 (validate parsed data against the spec, expose a read-only queryable dataset).
 Everything on the haptics side sits on top of it.
 
-TODO: add the solution test project (pick xUnit or NUnit for the whole solution) and wire it into EclipsePlayer.slnx
+DONE: EclipsePlayer.Funscript/FORMAT.md — the pinned format spec (base 1.0, strict/lenient contract, multi-axis 1.1 axes, semantic axis names, inbound TCode map)
+TODO: assemble a real .funscript test corpus in EclipsePlayer.Funscript.Tests/TestData: OFS export, classic ScriptPlayer, Handy download, a multi-axis set (separate files + a 1.1 axes single-file), plus messy ones (float at, unsorted, dupe at, negative at, missing wrapper fields, empty actions, BOM)
+TODO: add the solution test project — recommend xUnit, solution-wide — and wire it into EclipsePlayer.slnx
+TODO: confirm Funscript needs ZERO NuGet (System.Text.Json / System.Collections.Immutable / System.Buffers are in-box on net10) — keep Directory.Packages.props untouched for it
+TODO: EclipsePlayer.Funscript.csproj — add PackageLicenseExpression=MPL-2.0, IsPackable=false, GenerateDocumentationFile=true
+TODO: drop a LICENSE (MPL-2.0) into EclipsePlayer.Funscript/ so the license is unambiguous if the project is ever extracted
+TODO: sketch internal layout before scattering files: Model/ (Document, AxisScript, Action, Metadata), Axes/ (AxisName + constants + alias map), Parsing/ (Reader, Options, Result, probe), Serialization/ (writer); internal the JSON DTOs
 TODO: Funscript — immutable FunscriptAction (timestamp + position)
 TODO: Funscript — immutable AxisScript holding a sorted ImmutableArray<FunscriptAction> + metadata (range, inverted, axis name)
 TODO: Funscript — AxisName value-type-over-string + known constants; unknown names pass through
@@ -24,7 +30,6 @@ TODO: Funscript — versioned inbound TCode->name alias map (L0->stroke etc.) li
 TODO: Funscript — GetActionAt(TimeSpan) via binary search; return the bracketing pair
 TODO: Funscript — decide whether interpolation lives here or in Engine
 TODO: Funscript — tests first: boundaries, midpoints, before-first, after-last, empty, single-action
-TODO: write docs/funscript-format.md — pin to Eroscripts/OFS@<commit> + RFC 267449 (no formal spec exists); see memory funscript-format-findings
 TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Funscript)
 
 
