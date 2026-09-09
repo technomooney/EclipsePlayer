@@ -1,0 +1,9 @@
+{
+  "version": "1.1",
+  "actions": [ { "at": 0, "pos": 50 } ],
+  "axes": [
+    { "id": "R0", "actions": [ { "at": 0, "pos": 10 } ] },
+    { "id": "L1", "actions": [ { "at": 0, "pos": 90 } ] },
+    { "id": "A1", "actions": [ { "at": 0, "pos": 40 } ] }
+  ]
+}

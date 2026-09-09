@@ -1,0 +1,11 @@
+{
+  "version": "1.1",
+  "inverted": false,
+  "range": 90,
+  "metadata": {},
+  "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 60 } ],
+  "axes": [
+    { "id": "twist", "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 20 } ] },
+    { "id": "roll",  "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 80 } ] }
+  ]
+}

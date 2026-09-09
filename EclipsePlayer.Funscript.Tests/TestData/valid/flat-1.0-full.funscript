@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "inverted": false,
+  "range": 90,
+  "metadata": {
+    "creator": "synthetic",
+    "title": "full flat sample",
+    "duration": 3,
+    "tags": ["test"],
+    "notes": "every documented wrapper field present"
+  },
+  "actions": [
+    { "at": 0,    "pos": 10 },
+    { "at": 900,  "pos": 95 },
+    { "at": 1800, "pos": 5  },
+    { "at": 3000, "pos": 50 }
+  ]
+}
