@@ -15,11 +15,14 @@ Everything on the haptics side sits on top of it.
 
 TODO: add the solution test project (pick xUnit or NUnit for the whole solution) and wire it into EclipsePlayer.slnx
 TODO: Funscript — immutable FunscriptAction (timestamp + position)
-TODO: Funscript — immutable AxisScript holding a sorted ImmutableArray<FunscriptAction> + metadata (range, inverted, axis id)
-TODO: Funscript — factory: take parsed representation, sort + validate, return built object OR a structured list of validation errors
+TODO: Funscript — immutable AxisScript holding a sorted ImmutableArray<FunscriptAction> + metadata (range, inverted, axis name)
+TODO: Funscript — AxisName value-type-over-string + known constants; unknown names pass through
+TODO: Funscript — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
+TODO: Funscript — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize) option; takes bytes/stream, NEVER a file path
+TODO: Funscript — strict contract = base-1.0 WRITE rules (int ms, unique strictly-increasing at, pos 0-100); lenient coerces float/unsorted/dupe/negative + emits warnings
+TODO: Funscript — versioned inbound TCode->name alias map (L0->stroke etc.) lives HERE, not IO
 TODO: Funscript — GetActionAt(TimeSpan) via binary search; return the bracketing pair
 TODO: Funscript — decide whether interpolation lives here or in Engine
-TODO: Funscript — RESOLVED: strict validator = base-1.0 WRITE contract (int ms, unique strictly-increasing at, pos 0-100); float/unsorted/dupe/negative handling lives in IO normalization + warnings
 TODO: Funscript — tests first: boundaries, midpoints, before-first, after-last, empty, single-action
 TODO: write docs/funscript-format.md — pin to Eroscripts/OFS@<commit> + RFC 267449 (no formal spec exists); see memory funscript-format-findings
 TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Funscript)
@@ -27,12 +30,13 @@ TODO: add two-line SPDX headers as real source files get written (MPL-2.0 for Fu
 
 ## Backend build sequence (after Funscript)
 
-TODO: IO — read a .funscript file into the parsed representation Funscript validates
-TODO: IO — normalization layer for messy real-world funscript files (best-effort cleanup before handoff)
-TODO: IO — multi-axis OUTPUT = 1.1 `axes` array, ids = semantic names, top-level actions always = L0/stroke; optional classic sidecar export
-TODO: IO — multi-axis READ: 1.1 `axes` + 2.0 `channels` + classic separate-suffix files
-TODO: IO — canonical axis identity = semantic name (stroke/surge/sway/twist/roll/pitch/suck...), NOT TCode; value-type-over-string, unknown names pass through
-TODO: IO — versioned inbound map for files that use TCode ids in axes[].id (L0->stroke etc.), normalize to names on read
+TODO: IO — byte acquisition: async read to stream, BOM/encoding handling; hand streams to Funscript.Parse
+TODO: IO — container magic-byte sniffer (static table: ftyp / EBML 1A45DFA3 / RIFF / OGG...), NO Media dependency
+TODO: IO — library scan: walk folders, classify each file via Funscript.LooksLikeFunscript + the container sniffer (tier-1, no full parse)
+TODO: IO — script<->media correlation: filename matching, axis-suffix + variant detection, orphan warnings
+TODO: Funscript — serialize model->JSON: single-file 1.1 `axes` array output, ids = semantic names, top-level actions always = L0/stroke
+TODO: Funscript — deserialize: accept 1.1 `axes` + 2.0 `channels` + flat 1.0 from one stream
+TODO: IO — sidecar handling: discover `name.<axis>.funscript` files, group them, feed each stream to Funscript; optional classic-sidecar export (write paths + bytes)
 TODO: Hal — TCode name->channel map lives ONLY in the device adapter, parameterized by dialect/version + device model
 TODO: IO — media + script folder scanning; script <-> video matching
 TODO: Media — run the libmpv embed spike on the CachyOS box BEFORE any Media code (see memory: media-backend)
