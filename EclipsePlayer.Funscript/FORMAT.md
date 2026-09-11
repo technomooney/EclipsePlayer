@@ -32,6 +32,20 @@ channels. Those live in `EclipsePlayer.IO`, `EclipsePlayer.Engine` and
   (draft as of 2026-09).
 - **`funjack/launchcontrol`** — oldest written field description; origin of the
   canonical defaults.
+- **`Eroscripts/funlib`** — `funscript.schema.json` (JSON Schema draft-07), the
+  governed schema. Source of the `axisId` enum (§5.6) and the metadata fields in
+  §4.5.
+- **`multiaxis/TCode-Specification`** — `master` (v0.3, 2021-05-10) and `Dev` (v0.4,
+  draft) branches, **cross-checked against the fuller v0.3 text circulating on the
+  T-code Discord** (pasted in full by Marty, 2026-09-11). The GitHub mirror of both
+  branches is missing a whole section present in the Discord copy — "Multi-Axis
+  Devices → Extra functions on the OSR2/SR6" — so the GitHub repo alone is **not**
+  treated as complete; the Discord text is the fuller/authoritative one for this
+  section. It documents: `L0-L2`/`R0-R2` defined per-axis meanings (matches GitHub);
+  `V0`, `V1` = vibration motor channels (OSR2/SR6, undifferentiated by function);
+  `A0` = direct valve position; `A1` = "suck algorithm" valve control; `A2` = lube
+  motor speed — all specific to the OSR2/SR6 "extra functions," not a universal
+  definition of the `A`/`V` letters for every device.
 - Field behaviour cross-checked against OpenFunscripter and MultiFunPlayer.
 
 ## 3. Base format (`version` "1.0")
@@ -42,9 +56,10 @@ A funscript is a JSON object.
 |---|---|---|---|
 | `actions` | array | — (**required**) | timestamped positions |
 | `version` | string | `"1.0"` | informational only — see §4.3 |
-| `inverted` | bool | `false` | swap position: 0 ⇄ 100 |
-| `range` | int 0–100 | `90` | fraction of device physical range to use |
+| `inverted` | bool | `false` | swap position: 0 ⇄ 100. **Deprecated** per the governed schema (§2) — "not widely supported" — but still real, still parsed |
+| `range` | int 0–100 | `90` | fraction of device physical range to use. Same deprecation note as `inverted` |
 | `metadata` | object | absent | see §4.5 |
+| `channel` | string | absent | human-readable name **hint** for the top-level `actions` array, per the governed schema. Informational only, never identity — always ignored per §4.4, not treated as an axis id |
 | `rawActions` | array | absent | editor pre-simplification list — always ignored |
 
 ### Action object
@@ -124,11 +139,18 @@ Their presence is never an error.
 
 ### 4.5 Metadata
 
-`metadata` is optional and free-form (its shape is "what OpenFunscripter writes":
-`creator`, `title`, `description`, `duration`, `license`, `tags`, `performers`,
-`type`, `notes`, `script_url`, `chapters`, `bookmarks`, …). This library parses the
-keys it recognises into a typed structure and passes the rest through untouched. A
-malformed `metadata` value never fails the parse.
+`metadata` is optional and free-form (its shape is "what OpenFunscripter writes" plus
+what the governed schema, §2, adds: `creator`, `title`, `description`, `duration`
+(number, seconds), `durationTime` (timeSpan string, human-readable duration hint),
+`license`, `tags`, `performers`, `type`, `notes`, `script_url`, `topic_url`,
+`video_url`, `chapters`, `bookmarks`, …). This library parses the keys it recognises
+into a typed structure and passes the rest through untouched. A malformed `metadata`
+value never fails the parse.
+
+`chapters` and `bookmarks` entries use a **`timeSpan` string** (`HH:MM:SS.ms` or bare
+seconds, e.g. `"00:03:00.017"`), not integer ms like an action's `at` — a different
+representation living inside the same file. `chapters[]` = `{name, startTime,
+endTime}`; `bookmarks[]` = `{name, time}`.
 
 ## 5. Multi-axis
 
@@ -179,13 +201,22 @@ depends on). Each entry is `{ "id": <axis name>, "actions": [ … ] }`.
 A classic 1.0 player ignores the unknown `axes` key and plays `actions` — so this is
 a backward-compatible extension, not a break.
 
-On read, an `id` may be a semantic name **or** a TCode id (the RFC permits both) —
-TCode ids are normalised per §5.6.
+On read, `axes[].id` is TCode-only, a closed enum:
+`L0,L1,L2,R0,R1,R2,A0,A1,A2,V0,V1,V2` (per the governed schema, §2). Semantic names
+are never valid here — only as `channels` object keys (§5.4). Strict mode **rejects**
+an `axes[].id` outside this enum; lenient mode passes an unrecognised id through
+unchanged (§4.2). Recognised ids are normalised to names per §5.6.
 
 ### 5.4 Single-file `channels` (`version` "2.0") — read only
 
 The earlier, less-favoured proposal. `channels` is a JSON **object** keyed by axis
-name: `{ "twist": { "actions": [ … ] } }`. Read for compatibility; never written.
+name (free-form string, not the `axes` TCode enum): `{ "twist": { "actions": [ … ] } }`.
+Read for compatibility; never written.
+
+If both top-level `actions` and `channels.stroke` are present, the schema's stated
+intent is: single-axis devices (e.g. Handy) play `actions`, multi-axis devices (e.g.
+SR6) play `channels.stroke`. This is a playback/device concern — `Funscript` parses
+both and lets the caller (`Engine`/`Hal`) pick; it does not resolve the choice itself.
 
 ### 5.5 Top-level `actions` is always `stroke`
 
@@ -207,6 +238,21 @@ id. Output is always names.
 | `R1` | `roll` |
 | `R2` | `pitch` |
 | `A1` | `suck` |
+| `V0` | `vib0` |
+| `V1` | `vib1` |
+| `V2` | `vib2` |
+| `A0` | `valve` |
+| `A2` | `lube` |
+
+`A0`/`A1`/`A2`/`V0`/`V1` here come from the T-code v0.3 spec's own "Extra functions on
+the OSR2/SR6" text (§2): `A0` = direct valve position, `A1` = "suck algorithm" valve
+control (matches the OFS fork's independently-sourced `A1 = suck`), `A2` = lube motor
+speed, `V0`/`V1` = the two vibration motor channels, undifferentiated by function —
+hence numbered, not named. The spec frames these explicitly as **OSR2/SR6-specific**
+extras, not a universal definition of what `A`/`V` mean for every device — a different
+multi-axis device could assign them differently, and this table would need a
+per-device variant if one is found. `V2` has no citation on any device seen so far;
+kept numbered/generic for consistency with `V0`/`V1`.
 
 This table is versioned with the library. It is a **read-side compatibility shim
 only** — the reverse direction (name → device channel) is `EclipsePlayer.Hal`'s
@@ -262,7 +308,12 @@ TCode column is **for cross-reference only**; it is not used by this library.
 | `twist` | rotation (yaw) | R0 |
 | `roll` | tilt side to side | R1 |
 | `pitch` | tilt front to back | R2 |
-| `suck` | suction / air pump | A1 |
-| `vib` | vibration | — |
+| `suck` | suction / air pump (OSR2/SR6: "suck algorithm" valve control) | A1 |
+| `valve` | direct valve position (OSR2/SR6) | A0 |
+| `lube` | lube motor speed (OSR2/SR6) | A2 |
+| `vib0` | vibration motor 0 | V0 |
+| `vib1` | vibration motor 1 | V1 |
+| `vib2` | vibration motor 2 (no known device yet) | V2 |
+| `vib` | vibration (classic single-file suffix convention, §5.2) | — |
 | `pump` | pump | — |
 | `raw` | passthrough | — |
