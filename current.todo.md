@@ -4,29 +4,28 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-09 (end of session — building the Funscript model, one type at a time, teaching pace)
+Last updated: 2026-09-11 (end of session — building the Funscript model, one type at a time, teaching pace)
 
 
-## DONE this session
+## DONE this session (2026-09-11)
 
-DONE: EclipsePlayer.Funscript/FORMAT.md — pinned format spec (base 1.0, strict/lenient contract, multi-axis 1.1 axes, semantic axis names, inbound TCode map)
-DONE: 22 synthetic test fixtures in EclipsePlayer.Funscript.Tests/TestData/ (+ README = strict/lenient outcome matrix). Real tool exports to be added later under a corpus/ dir.
-DONE: EclipsePlayer.Funscript.Tests wired — xUnit, CPM-clean, ProjectReference to Funscript, TestData copies to output, in EclipsePlayer.slnx. Builds green, 0 tests.
-DONE: Model/FunscriptAction.cs — `readonly record struct FunscriptAction(int AtMilliSecond, int Position)`. Timestamp is int ms (NOT double — see funscript-format-findings memory).
-DONE: Model/AxisName.cs — `readonly record struct AxisName(string Name)` + static known members (Stroke/Surge/Sway/Twist/Roll/Pitch/Suck) + `From(string raw)` (trim, ToLowerInvariant, switch-expression TCode map L0..A1 -> names, unknown passes through).
+DONE: Found + reconciled the governed schema (Eroscripts/funlib funscript.schema.json) and the actual TCode spec (multiaxis/TCode-Specification, cross-checked against the fuller Discord-circulated v0.3 text — the GitHub mirror is missing a section). FORMAT.md updated: axes[].id is now a closed TCode enum (strict mode rejects non-members), deprecated flags noted, new metadata fields added (durationTime, topic_url, video_url, channel hint, chapters/bookmarks timeSpan shape). See funscript-format-findings memory for the full citation trail.
+DONE: AxisName.From extended — V0/V1/V2 -> vib0/vib1/vib2, A0 -> valve, A1 -> suck (unchanged, now double-confirmed), A2 -> lube. Matching static properties added. Committed (amended into the axis-map commit).
+DONE: .editorconfig — SPDX file-header enforcement via Roslyn IDE0073, scoped MPL-2.0 (Hal/Funscript + their Tests) vs GPL-3.0-or-later (everything else), per licensing-model. Verified with dotnet format against real files in both a MPL and a GPL project before committing. Answers "can Rider add SPDX headers automatically" — yes, cross-tool, via dotnet format / build warnings, not a Rider-only setting.
+DONE: Model/AxisScript.cs — `public sealed record AxisScript(AxisName Axis, bool Inverted, int Range, ImmutableArray<FunscriptAction> Actions);`. New concept covered: ImmutableArray<T>. Build green.
+DONE: Model/FunscriptMetadata.cs — scalars-only first pass (init-only properties, not positional — 11 optional fields don't fit a positional record well). New concept covered: record with `{ get; init; }` properties + object-initializer construction. Build green. tags/performers/chapters/bookmarks deliberately deferred (need list-of-string handling + two new nested record types + the timeSpan-string question).
 
-Uncommitted at session end: FunscriptAction.cs, AxisName.cs, Funscript.cs stub (Marty's code — his to commit). Also his App.axaml / MainViewModel.cs WIP.
+Uncommitted at session end: AxisScript.cs, FunscriptMetadata.cs (Marty's code — his to commit; check `git status --short` first, Rider auto-stages new files — see repo-state memory gotcha).
 
 
 ## RESUME HERE — next single step
 
-TODO: Model/AxisScript.cs — `public sealed record AxisScript(AxisName Axis, bool Inverted, int Range, ImmutableArray<FunscriptAction> Actions);` + `using System.Collections.Immutable;`. New concept: ImmutableArray (read-only list). Build green.
+TODO: Model/FunscriptDocument.cs — Stroke (AxisScript for top-level actions) + ImmutableArray<AxisScript> for the others + Metadata
 
 
 ## Then, in order (Funscript model + parser)
 
-TODO: Model/FunscriptMetadata.cs — recognized keys typed (Duration = double seconds, per OFS commit 99609f7) + raw bag for the rest; never rejects
-TODO: Model/FunscriptDocument.cs — Stroke (AxisScript for top-level actions) + ImmutableArray<AxisScript> for the others + Metadata
+TODO: Model/FunscriptMetadata.cs — add Tags/Performers (list of string) + Chapters/Bookmarks (new Chapter/Bookmark record types, timeSpan-string field — decide raw string vs parsed TimeSpan) once ready; raw bag for unrecognized keys deferred to the parsing step (needs System.Text.Json.JsonElement, a new concept Marty wants to meet in context rather than pre-explained)
 TODO: smoke test — hand-build a FunscriptDocument in a [Fact], assert a property; proves the model is usable. First green test.
 TODO: Parsing — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
 TODO: Parsing — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize); takes bytes/stream, NEVER a file path
