@@ -12,3 +12,15 @@ indent_size = 4
 
 [*.{axaml,xaml,xml,json,slnx}]
 indent_size = 2
+
+# SPDX file headers (Roslyn IDE0073 — cross-tool: dotnet format, VS, Rider all honor
+# this). Default is GPL-3.0-or-later (the app + most libs); the MPL-2.0 section below
+# overrides it for Hal/Funscript + their Tests projects, per the licensing-model
+# design doc. Editorconfig rule: for a file matched by both sections, the later
+# section's value for a given property wins — order here matters.
+[*.cs]
+file_header_template = SPDX-FileCopyrightText: 2026 Marty Mooney\nSPDX-License-Identifier: GPL-3.0-or-later
+dotnet_diagnostic.IDE0073.severity = warning
+
+[{EclipsePlayer.Hal,EclipsePlayer.Hal.Tests,EclipsePlayer.Funscript,EclipsePlayer.Funscript.Tests}/**.cs]
+file_header_template = SPDX-FileCopyrightText: 2026 Marty Mooney\nSPDX-License-Identifier: MPL-2.0
