@@ -26,26 +26,52 @@ channels. Those live in `EclipsePlayer.IO`, `EclipsePlayer.Engine` and
 
 ## 2. Pinned sources
 
-- **Eroscripts/OFS**, branch `dev` @ `e9c910e` (single-file multi-axis work landed in
-  commits `c9592c0`…`b670ff6`, "read 2.0"…"preserve topic", 2025-09-27).
-- **RFC: single-file multi-axis** — `discuss.eroscripts.com/t/rfc-single-file-multi-axis/267449`
+Re-verified live against source, 2026-09-17 — links resolve as of that date; repos are
+third-party and can move or change without notice, hence the pinned commits/branches.
+
+- **[`Eroscripts/OFS`](https://github.com/Eroscripts/OFS)**, branch
+  [`dev`](https://github.com/Eroscripts/OFS/tree/dev) @
+  [`e9c910e`](https://github.com/Eroscripts/OFS/commit/e9c910e830d628171fb3718fbf294d9578424ef6)
+  (single-file multi-axis work landed in commits
+  [`c9592c0`](https://github.com/Eroscripts/OFS/commit/c9592c0168c34a1cdbc2ae0f26dfd4f0e4e2f04c)
+  "read 2.0" …
+  [`b670ff6`](https://github.com/Eroscripts/OFS/commit/b670ff639050641952f7e8b09e0230619cc423e6)
+  "preserve topic", 2025-09-27).
+- **RFC: single-file multi-axis** —
+  [`discuss.eroscripts.com/t/rfc-single-file-multi-axis/267449`](https://discuss.eroscripts.com/t/rfc-single-file-multi-axis/267449)
   (draft as of 2026-09).
-- **`funjack/launchcontrol`** — oldest written field description; origin of the
-  canonical defaults.
-- **`Eroscripts/funlib`** — `funscript.schema.json` (JSON Schema draft-07), the
-  governed schema. Source of the `axisId` enum (§5.6) and the metadata fields in
-  §4.5.
-- **`multiaxis/TCode-Specification`** — `master` (v0.3, 2021-05-10) and `Dev` (v0.4,
-  draft) branches, **cross-checked against the fuller v0.3 text circulating on the
-  T-code Discord** (pasted in full by Marty, 2026-09-11). The GitHub mirror of both
-  branches is missing a whole section present in the Discord copy — "Multi-Axis
-  Devices → Extra functions on the OSR2/SR6" — so the GitHub repo alone is **not**
-  treated as complete; the Discord text is the fuller/authoritative one for this
-  section. It documents: `L0-L2`/`R0-R2` defined per-axis meanings (matches GitHub);
-  `V0`, `V1` = vibration motor channels (OSR2/SR6, undifferentiated by function);
-  `A0` = direct valve position; `A1` = "suck algorithm" valve control; `A2` = lube
-  motor speed — all specific to the OSR2/SR6 "extra functions," not a universal
-  definition of the `A`/`V` letters for every device.
+- **[`funjack/launchcontrol`](https://github.com/funjack/launchcontrol)** — oldest
+  written field description; source file
+  [`protocol/funscript/funscript.go`](https://github.com/funjack/launchcontrol/blob/master/protocol/funscript/funscript.go).
+  Re-checked 2026-09-17: this is Handy/Launch-specific, not a generic funscript
+  reader — `Range` defaults to Go's zero value `0`, which this code treats as "don't
+  scale, use position unmodified," a different *meaning* than a percentage default.
+  Its own JSON schema copy is at
+  [`schemas/funscript.schema.json`](https://github.com/funjack/launchcontrol/blob/master/schemas/funscript.schema.json)
+  (older/narrower than the governed schema below; not treated as authoritative where
+  they differ).
+- **[`Eroscripts/funlib`](https://github.com/Eroscripts/funlib)** —
+  [`funscript.schema.json`](https://github.com/Eroscripts/funlib/blob/master/funscript.schema.json)
+  (JSON Schema draft-07), the governed schema. Source of the `axisId` enum (§5.6) and
+  the metadata fields in §4.5. The repo also has a narrative
+  [`docs/funscript-format-specification.md`](https://github.com/Eroscripts/funlib/blob/master/docs/funscript-format-specification.md)
+  — looser and less precise than the schema itself (e.g. it says `"vibe"` where the
+  schema/this doc use `vib0`/`vib1`/`vib2`); **not treated as an independent
+  authority**, the schema file wins on any conflict.
+- **[`multiaxis/TCode-Specification`](https://github.com/multiaxis/TCode-Specification)**
+  — [`master`](https://github.com/multiaxis/TCode-Specification/tree/master) (v0.3,
+  2021-05-10) and [`Dev`](https://github.com/multiaxis/TCode-Specification/tree/Dev)
+  (v0.4, draft) branches, **cross-checked against the fuller v0.3 text circulating on
+  the T-code Discord** (pasted in full by Marty, 2026-09-11). Re-confirmed 2026-09-17
+  directly against both branches' live `README.md`: **both are still missing** the
+  section present in the Discord copy — "Multi-Axis Devices → Extra functions on the
+  OSR2/SR6" — so the GitHub repo alone is **not** treated as complete; the Discord
+  text is the fuller/authoritative one for this section. It documents: `L0-L2`/`R0-R2`
+  defined per-axis meanings (matches GitHub); `V0`, `V1` = vibration motor channels
+  (OSR2/SR6, undifferentiated by function); `A0` = direct valve position; `A1` =
+  "suck algorithm" valve control; `A2` = lube motor speed — all specific to the
+  OSR2/SR6 "extra functions," not a universal definition of the `A`/`V` letters for
+  every device.
 - Field behaviour cross-checked against OpenFunscripter and MultiFunPlayer.
 
 ## 3. Base format (`version` "1.0")
@@ -57,7 +83,7 @@ A funscript is a JSON object.
 | `actions` | array | — (**required**) | timestamped positions |
 | `version` | string | `"1.0"` | informational only — see §4.3 |
 | `inverted` | bool | `false` | swap position: 0 ⇄ 100. **Deprecated** per the governed schema (§2) — "not widely supported" — but still real, still parsed |
-| `range` | int 0–100 | `90` | fraction of device physical range to use. Same deprecation note as `inverted` |
+| `range` | int 0–100 | `100` | fraction of device physical range to use. Same deprecation note as `inverted`. Default re-verified 2026-09-17 against OFS master (`Funscript.cpp`, `json["range"] = 100` hardcoded on write); the governed schema declares no default at all, and `launchcontrol` treats an omitted/zero value as "don't scale" rather than a percentage — a prior version of this doc stated `90`, which matched none of the three sources on inspection |
 | `metadata` | object | absent | see §4.5 |
 | `channel` | string | absent | human-readable name **hint** for the top-level `actions` array, per the governed schema. Informational only, never identity — always ignored per §4.4, not treated as an axis id |
 | `rawActions` | array | absent | editor pre-simplification list — always ignored |
@@ -79,7 +105,7 @@ A funscript is a JSON object.
 {
   "version": "1.0",
   "inverted": false,
-  "range": 90,
+  "range": 100,
   "metadata": { "creator": "someone", "duration": 623 },
   "actions": [
     { "at": 0,    "pos": 0   },
@@ -132,10 +158,13 @@ warnings describing what was changed.
 Never branch on the `version` string. Detect capability by key presence:
 `channels` → §5.4; else `axes` → §5.3; else flat §3.
 
-### 4.4 Always ignored
+### 4.4 Always tolerated (never an error)
 
 Unknown top-level keys, `rawActions`, and any unrecognised keys inside `metadata`.
-Their presence is never an error.
+None of these fail the parse. They split into two different fates on write, per §4.6:
+`rawActions` is a **deliberate exclusion** — an editor's pre-simplification cache,
+always discarded, never round-tripped. Unknown top-level keys and unknown `metadata`
+keys are **preserved**, not discarded — see §4.6 for the mechanism.
 
 ### 4.5 Metadata
 
@@ -144,13 +173,56 @@ what the governed schema, §2, adds: `creator`, `title`, `description`, `duratio
 (number, seconds), `durationTime` (timeSpan string, human-readable duration hint),
 `license`, `tags`, `performers`, `type`, `notes`, `script_url`, `topic_url`,
 `video_url`, `chapters`, `bookmarks`, …). This library parses the keys it recognises
-into a typed structure and passes the rest through untouched. A malformed `metadata`
-value never fails the parse.
+into a typed structure; unrecognised keys are preserved per §4.6, not discarded. A
+malformed `metadata` value never fails the parse.
 
 `chapters` and `bookmarks` entries use a **`timeSpan` string** (`HH:MM:SS.ms` or bare
 seconds, e.g. `"00:03:00.017"`), not integer ms like an action's `at` — a different
 representation living inside the same file. `chapters[]` = `{name, startTime,
 endTime}`; `bookmarks[]` = `{name, time}`.
+
+### 4.6 Preserving unrecognised data (round-trip safety)
+
+**Motivation.** OFS's own `dev` branch header (`OFS-lib/Funscript/Funscript.h`) has a
+drafted-but-unshipped fix for exactly this gap:
+
+```cpp
+// FIXME: OFS should be able to retain metadata injected by other programs without overwriting it
+//nlohmann::json JsonOther;
+```
+
+OFS writes its file by explicitly listing every field it knows about — anything it
+doesn't recognise is simply absent from that list, so a load-then-save round trip
+silently destroys data another tool wrote (a custom extension field, a foreign app's
+metadata key). The fix was drafted and never wired up — plausibly because `Funscript`
+there is a long-lived, mutable, in-editor object, and keeping a raw JSON side-bag in
+sync with fields the user is actively editing over a session is a real
+staleness/synchronisation hazard in a mutable design.
+
+**This library's design commitment**, made possible by the model being immutable
+records rather than a long-lived mutable object (every `FunscriptDocument` is
+produced fresh, once, by `Parse` — there is no live session to drift out of sync
+during):
+
+- At parse time, every incoming JSON key is sorted into exactly one of two disjoint
+  sets: keys the model understands (become typed fields) and everything else (an
+  opaque bag). A key must never appear in both — that disjointness is what makes the
+  later write-merge unambiguous, and it only has to be enforced once, at parse time.
+- The opaque bag is carried on the model itself (not left behind in a parse-result
+  wrapper), because serialisation only has the model to work from. Two separate bags:
+  one for unknown top-level keys (on `FunscriptDocument`), one for unknown `metadata`
+  keys (on `FunscriptMetadata`).
+- Each entry's value is an untouched `System.Text.Json.JsonElement` — this library
+  doesn't need to understand a key's shape to preserve it byte-for-byte.
+- On write, typed fields are emitted as normal, then every entry still sitting in the
+  bag is emitted alongside them. Disjointness guarantees no key collision to resolve.
+- Scope: top-level keys and `metadata` keys only, per §4.4/§4.5. Does **not** extend
+  to unknown fields inside individual `axes`/`channels`/`actions` entries (a separate,
+  harder problem, not yet designed), and never applies to `rawActions` (§4.4 —
+  deliberately discarded, not preserved).
+
+Not yet built — see the open TODO in `current.todo.md` to design this in depth before
+or alongside the `FunscriptMetadata` extension work.
 
 ## 5. Multi-axis
 
@@ -188,7 +260,7 @@ depends on). Each entry is `{ "id": <axis name>, "actions": [ … ] }`.
 {
   "version": "1.1",
   "inverted": false,
-  "range": 90,
+  "range": 100,
   "metadata": { },
   "actions": [ { "at": 0, "pos": 50 } ],
   "axes": [
