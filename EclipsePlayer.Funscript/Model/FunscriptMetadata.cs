@@ -16,5 +16,11 @@ public sealed record FunscriptMetadata
     public string? ScriptUrl { get; init; }
     public string? TopicUrl { get; init; }
     public string? VideoUrl { get; init; }
+    public List<string>? Tags { get; init; }
+    public List<string>? Performers { get; init; }
+    public List<FunscriptChapter>? Chapters { get; init; }
+    public List<FunscriptBookmark>? Bookmarks { get; init; }
+
+
 
 }
