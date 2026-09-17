@@ -4,29 +4,36 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-11 (end of session — building the Funscript model, one type at a time, teaching pace)
+Last updated: 2026-09-17 (end of session — building the Funscript model, one type at a time, teaching pace)
 
 
-## DONE this session (2026-09-11)
+## DONE this session (2026-09-17)
 
-DONE: Found + reconciled the governed schema (Eroscripts/funlib funscript.schema.json) and the actual TCode spec (multiaxis/TCode-Specification, cross-checked against the fuller Discord-circulated v0.3 text — the GitHub mirror is missing a section). FORMAT.md updated: axes[].id is now a closed TCode enum (strict mode rejects non-members), deprecated flags noted, new metadata fields added (durationTime, topic_url, video_url, channel hint, chapters/bookmarks timeSpan shape). See funscript-format-findings memory for the full citation trail.
-DONE: AxisName.From extended — V0/V1/V2 -> vib0/vib1/vib2, A0 -> valve, A1 -> suck (unchanged, now double-confirmed), A2 -> lube. Matching static properties added. Committed (amended into the axis-map commit).
-DONE: .editorconfig — SPDX file-header enforcement via Roslyn IDE0073, scoped MPL-2.0 (Hal/Funscript + their Tests) vs GPL-3.0-or-later (everything else), per licensing-model. Verified with dotnet format against real files in both a MPL and a GPL project before committing. Answers "can Rider add SPDX headers automatically" — yes, cross-tool, via dotnet format / build warnings, not a Rider-only setting.
-DONE: Model/AxisScript.cs — `public sealed record AxisScript(AxisName Axis, bool Inverted, int Range, ImmutableArray<FunscriptAction> Actions);`. New concept covered: ImmutableArray<T>. Build green.
-DONE: Model/FunscriptMetadata.cs — scalars-only first pass (init-only properties, not positional — 11 optional fields don't fit a positional record well). New concept covered: record with `{ get; init; }` properties + object-initializer construction. Build green. tags/performers/chapters/bookmarks deliberately deferred (need list-of-string handling + two new nested record types + the timeSpan-string question).
+DONE: Model/FunscriptDocument.cs — `public sealed record FunscriptDocument(AxisScript Stroke, ImmutableArray<AxisScript> Axes, FunscriptMetadata Metadata);`. Confirmed design: `Stroke` is just another `AxisScript`, not a separate shape — one axis type used everywhere, per FORMAT.md §5.5. Committed.
+DONE: Model/FunscriptMetadata.cs extended — Tags/Performers (`List<string>?`) + Chapters/Bookmarks (new `FunscriptChapter`/`FunscriptBookmark` records). Committed.
+DONE: FunscriptChapter/FunscriptBookmark's time fields are real `System.TimeSpan`, not raw strings — decided so later editor code gets TimeSpan's arithmetic/comparisons for free instead of re-deriving them.
+DONE: FORMAT.md fully reconciled against LIVE primary sources (re-fetched every §2 repo/branch/commit directly, not from memory) — real links added throughout; `range` default corrected 90 → 100 (checked OFS master `Funscript.cpp` which hardcodes 100, the governed schema which declares no default, and launchcontrol which uses 0 to mean something else entirely — 90 matched none of them). Confirmed the OSR2/SR6 TCode gap is still unfixed upstream on both branches.
+DONE: FORMAT.md §4.6 added — design commitment for preserving unrecognised top-level/metadata keys on round-trip (motivated by a real, unshipped FIXME found in OFS `dev`'s `Funscript.h`: `JsonOther`). Not built yet — see TODO below.
+DONE: Decided `Funscript` (the parser/writer facade, currently an empty stub) will be a `static class` — it's a pure bytes-in/bytes-out transform with nothing to hold between calls, same shape as `Math`/`Convert`/`JsonSerializer`. Not a singleton; no instances at all.
+DONE: Worked out the `ParseTimeSpan` algorithm needed for chapters/bookmarks — confirmed empirically (ran it, didn't just assume) that BOTH `TimeSpan.Parse`/`TryParse` AND `System.ComponentModel.TimeSpanConverter` misparse the schema's `timeSpan` string format (`"623"` → 623 days not seconds; `"6:23"` → 6 hours 23 min not 6 min 23 sec). Full algorithm + citations in the Parsing TODO below. Not built yet — it's `Parse`-side work.
+DONE: `EclipsePlayer.Funscript.Tests/Model/` folder created (empty, csproj-referenced) ready for the smoke test — see RESUME HERE.
 
-Uncommitted at session end: AxisScript.cs, FunscriptMetadata.cs (Marty's code — his to commit; check `git status --short` first, Rider auto-stages new files — see repo-state memory gotcha).
+Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the empty `Model\` folder reference — harmless, safe to commit any time, or it'll auto-resolve once the smoke test file below is added to that folder).
 
 
 ## RESUME HERE — next single step
 
-TODO: Model/FunscriptDocument.cs — Stroke (AxisScript for top-level actions) + ImmutableArray<AxisScript> for the others + Metadata
+TODO: First smoke test. New file `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs` (NOT `Parsing/FunscriptReaderTest.cs` — that stub is reserved for the real `Funscript.Parse` tests later; this smoke test doesn't touch parsing at all). One `[Fact]`: hand-build a couple `FunscriptAction`s → wrap in an `AxisScript` for `Stroke` → build a `FunscriptMetadata` → construct a `FunscriptDocument` → `Assert.Equal(...)` on something simple back off it (e.g. `document.Stroke.Actions.Length`). Proves the model graph actually holds together end to end. Standard Arrange/Act/Assert shape.
+
+Docs handed over for writing this (project uses **xUnit v2.9.3**, not v3 — noted where it matters):
+- https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test — how `dotnet test` works
+- https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit — full walkthrough: `[Fact]`, `Assert.Equal`, project structure. Best starting point.
+- https://xunit.net/docs/getting-started/v3/cmdline — `[Fact]` vs `[Theory]` (`[Theory]` = same test run repeatedly with different inputs; you'll want it later for strict/lenient parsing tests). Written for v3 but the attributes/`Assert` syntax is unchanged from v2.
+- https://xunit.net/docs/shared-context — not needed yet; bookmark for when tests need shared setup (e.g. loading the same fixture file across many `[Theory]` cases).
 
 
 ## Then, in order (Funscript model + parser)
 
-TODO: Model/FunscriptMetadata.cs — add Tags/Performers (list of string) + Chapters/Bookmarks (new Chapter/Bookmark record types) once ready; raw bag for unrecognized keys deferred to the parsing step (needs System.Text.Json.JsonElement, a new concept Marty wants to meet in context rather than pre-explained)
-TODO: Chapter/Bookmark startTime/endTime/time — DECIDED 2026-09-17: real `System.TimeSpan`, not a raw string, so later editor code gets its arithmetic/comparison for free. Model layer just holds `TimeSpan` properties (done); conversion is Parse-side work, see the dedicated TODO under Parsing below.
 TODO: Go over "preserving unrecognised data" in real depth before/alongside building it (see FORMAT.md §4.6, added 2026-09-17 off OFS dev's own unshipped `JsonOther` FIXME). Needs a real design pass, not just the sketch in §4.6: where exactly `UnknownFields` bags live on `FunscriptDocument`/`FunscriptMetadata`, how `Parse` enforces the known/unknown key disjointness invariant, how `Export`/`ToJson` merges them back in, and whether `JsonElement` is the right carrier type or something else fits the immutable-record model better
 TODO: smoke test — hand-build a FunscriptDocument in a [Fact], assert a property; proves the model is usable. First green test.
 TODO: Parsing — `Funscript` becomes a `static class` (decided 2026-09-17: it's a pure bytes-in/bytes-out transform with no state to hold between calls, same shape as `Math`/`Convert`/`JsonSerializer` — not a singleton, no instances at all)
