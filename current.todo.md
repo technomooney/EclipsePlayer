@@ -4,10 +4,15 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-17 (end of session — building the Funscript model, one type at a time, teaching pace)
+Last updated: 2026-09-24 (first green test — smoke test proves the model graph holds together)
 
 
-## DONE this session (2026-09-17)
+## DONE this session (2026-09-24)
+
+DONE: First smoke test — `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs`, `TestFunDocWiring`. Hand-built 4 `FunscriptAction`s -> `ImmutableArray.Create` -> `AxisScript` (Stroke) -> `FunscriptMetadata` (object-initializer syntax) -> `FunscriptDocument`. Asserts on `Stroke.Actions.Length`, `Metadata.Creator`, `Metadata.Title`. Passes. Proves the model graph (actions -> axis -> document, with metadata attached) actually holds together end to end. Uncommitted `EclipsePlayer.Funscript.Tests.csproj` `Model\` folder reference now resolves for real.
+
+
+## DONE previous session (2026-09-17)
 
 DONE: Model/FunscriptDocument.cs — `public sealed record FunscriptDocument(AxisScript Stroke, ImmutableArray<AxisScript> Axes, FunscriptMetadata Metadata);`. Confirmed design: `Stroke` is just another `AxisScript`, not a separate shape — one axis type used everywhere, per FORMAT.md §5.5. Committed.
 DONE: Model/FunscriptMetadata.cs extended — Tags/Performers (`List<string>?`) + Chapters/Bookmarks (new `FunscriptChapter`/`FunscriptBookmark` records). Committed.
@@ -23,19 +28,11 @@ Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the emp
 
 ## RESUME HERE — next single step
 
-TODO: First smoke test. New file `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs` (NOT `Parsing/FunscriptReaderTest.cs` — that stub is reserved for the real `Funscript.Parse` tests later; this smoke test doesn't touch parsing at all). One `[Fact]`: hand-build a couple `FunscriptAction`s → wrap in an `AxisScript` for `Stroke` → build a `FunscriptMetadata` → construct a `FunscriptDocument` → `Assert.Equal(...)` on something simple back off it (e.g. `document.Stroke.Actions.Length`). Proves the model graph actually holds together end to end. Standard Arrange/Act/Assert shape.
-
-Docs handed over for writing this (project uses **xUnit v2.9.3**, not v3 — noted where it matters):
-- https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test — how `dotnet test` works
-- https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit — full walkthrough: `[Fact]`, `Assert.Equal`, project structure. Best starting point.
-- https://xunit.net/docs/getting-started/v3/cmdline — `[Fact]` vs `[Theory]` (`[Theory]` = same test run repeatedly with different inputs; you'll want it later for strict/lenient parsing tests). Written for v3 but the attributes/`Assert` syntax is unchanged from v2.
-- https://xunit.net/docs/shared-context — not needed yet; bookmark for when tests need shared setup (e.g. loading the same fixture file across many `[Theory]` cases).
+TODO: Go over "preserving unrecognised data" in real depth before/alongside building it (see FORMAT.md §4.6, added 2026-09-17 off OFS dev's own unshipped `JsonOther` FIXME). Needs a real design pass, not just the sketch in §4.6: where exactly `UnknownFields` bags live on `FunscriptDocument`/`FunscriptMetadata`, how `Parse` enforces the known/unknown key disjointness invariant, how `Export`/`ToJson` merges them back in, and whether `JsonElement` is the right carrier type or something else fits the immutable-record model better
 
 
 ## Then, in order (Funscript model + parser)
 
-TODO: Go over "preserving unrecognised data" in real depth before/alongside building it (see FORMAT.md §4.6, added 2026-09-17 off OFS dev's own unshipped `JsonOther` FIXME). Needs a real design pass, not just the sketch in §4.6: where exactly `UnknownFields` bags live on `FunscriptDocument`/`FunscriptMetadata`, how `Parse` enforces the known/unknown key disjointness invariant, how `Export`/`ToJson` merges them back in, and whether `JsonElement` is the right carrier type or something else fits the immutable-record model better
-TODO: smoke test — hand-build a FunscriptDocument in a [Fact], assert a property; proves the model is usable. First green test.
 TODO: Parsing — `Funscript` becomes a `static class` (decided 2026-09-17: it's a pure bytes-in/bytes-out transform with no state to hold between calls, same shape as `Math`/`Convert`/`JsonSerializer` — not a singleton, no instances at all)
 TODO: Parsing — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
 TODO: Parsing — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize); takes bytes/stream, NEVER a file path
