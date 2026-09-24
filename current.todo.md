@@ -4,13 +4,20 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-24 (first green test — smoke test proves the model graph holds together)
+Last updated: 2026-09-24 (metadata DTO + read-direction mapping built and building clean)
 
 
 ## DONE this session (2026-09-24)
 
-DONE: First smoke test — `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs`, `TestFunDocWiring`. Hand-built 4 `FunscriptAction`s -> `ImmutableArray.Create` -> `AxisScript` (Stroke) -> `FunscriptMetadata` (object-initializer syntax) -> `FunscriptDocument`. Asserts on `Stroke.Actions.Length`, `Metadata.Creator`, `Metadata.Title`. Passes. Proves the model graph (actions -> axis -> document, with metadata attached) actually holds together end to end. Uncommitted `EclipsePlayer.Funscript.Tests.csproj` `Model\` folder reference now resolves for real.
-DONE: FORMAT.md §4.6 mechanism decided — `[JsonExtensionData]` on an internal wire-shape DTO's `Dictionary<string, JsonElement>? Extra` property, not a hand-rolled known/unknown key split. Confirmed against the API docs: value type must be `JsonElement`/`object` keyed by `string`, only one such property per type, compatible with positional-record constructors (populated post-construction). Lifetime concern (does the captured `JsonElement` survive after `Deserialize` returns, or is it tied to a disposable `JsonDocument`) resolved empirically — ran a throwaway probe (deserialize, capture the element, drop every other reference, force `GC.Collect()`, read it back) and it read correctly. Full writeup in FORMAT.md §4.6. Not built yet — DTO shapes + `Parse`/write mapping code are next, see RESUME HERE.
+DONE: First smoke test — `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs`, `TestFunDocWiring`. Hand-built 4 `FunscriptAction`s -> `ImmutableArray.Create` -> `AxisScript` (Stroke) -> `FunscriptMetadata` (object-initializer syntax) -> `FunscriptDocument`. Asserts on `Stroke.Actions.Length`, `Metadata.Creator`, `Metadata.Title`. Passes. Proves the model graph (actions -> axis -> document, with metadata attached) actually holds together end to end.
+DONE: FORMAT.md §4.6 mechanism decided — `[JsonExtensionData]` on an internal wire-shape DTO's `Dictionary<string, JsonElement>? Extra` property, not a hand-rolled known/unknown key split. Verified empirically that a captured `JsonElement` survives after the deserialized object and all other references are dropped and a GC is forced — safe to hold on a long-lived immutable record. Full writeup in FORMAT.md §4.6.
+DONE: `Parsing/Dto/FunscriptMetadataDto.cs`, `FunscriptChapterDto.cs`, `FunscriptBookmarkDto.cs` — internal wire-shape DTOs for the `metadata` object only (top-level 1.0/1.1/2.0 DTO(s) deliberately deferred to the full `Parse` work — metadata's shape doesn't vary by version, so it didn't need to wait). Every field uses `[JsonPropertyName]` explicitly since the wire keys mix casing conventions (`duration` vs `durationTime` vs `script_url`) and `System.Text.Json` is case-sensitive by default. `FunscriptMetadataDto.Extra` carries the `[JsonExtensionData]` bag.
+DONE: `Model/FunscriptMetadata.cs` gained `UnknownFields` (`Dictionary<string, JsonElement>?`) — the domain-side home for `Extra` per §4.6.
+DONE: `Funscript.cs` is now the decided `static class` (was still an empty instance-class stub); gained `internal static TimeSpan ParseTimeSpan(string)` implementing the 2026-09-17 algorithm (split on `:`, walk backward from seconds through minutes/hours using the `^n` index-from-end operator, `0` fallback via the ternary operator when a segment is absent).
+DONE: `Parsing/Dto/MetadataMapper.cs` — `internal static FunscriptMetadata ToDomain(FunscriptMetadataDto dto)`. Scalars map straight across; `Chapters`/`Bookmarks` use `dto.X?.Select(...).ToList()` (LINQ projection + null-conditional) combined with `Funscript.ParseTimeSpan` and the `!` null-forgiving operator (deliberately not validated yet — that's strict/lenient work, still ahead). Read direction only; write direction (domain -> DTO) not yet built.
+DONE: `dotnet build EclipsePlayer.slnx` — clean, 0 warnings, 0 errors, confirms all of the above actually compiles together.
+
+Not yet done: `MetadataMapper.ToDomain` has never actually been run against real JSON (only compiled) — no test exists yet. Write-direction mapping (domain -> DTO, for the eventual `Write`/`ToJson`) also not started.
 
 
 ## DONE previous session (2026-09-17)
@@ -29,15 +36,15 @@ Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the emp
 
 ## RESUME HERE — next single step
 
-TODO: Build the wire-shape DTOs for §4.6 — one for the top-level JSON object, one for `metadata` — each with a `[JsonExtensionData] Dictionary<string, JsonElement>? Extra` property alongside the known fields. Then the DTO -> domain model hand-mapping (carrying `Extra` into the bag field on `FunscriptDocument`/`FunscriptMetadata`) and the reverse for write. Mechanism is decided (see FORMAT.md §4.6); this is the first real implementation of it.
+TODO: A real test for `MetadataMapper.ToDomain` — deserialize actual JSON (e.g. a string literal with a known key, an unrecognised key, and a `chapters`/`bookmarks` entry) into `FunscriptMetadataDto` via `JsonSerializer.Deserialize`, run it through `ToDomain`, assert the typed fields, the `TimeSpan` conversion, and that the unrecognised key landed in `UnknownFields`. It's only ever been compiled so far, never actually run.
+TODO: Write-direction mapping — domain `FunscriptMetadata` -> `FunscriptMetadataDto` (merging `UnknownFields` back into `Extra`), for the eventual `Write`/`ToJson` path.
 
 
 ## Then, in order (Funscript model + parser)
 
-TODO: Parsing — `Funscript` becomes a `static class` (decided 2026-09-17: it's a pure bytes-in/bytes-out transform with no state to hold between calls, same shape as `Math`/`Convert`/`JsonSerializer` — not a singleton, no instances at all)
+TODO: Parsing — build the top-level wire-shape DTO(s) for §4.6, deferred when the metadata DTO was built since it has to handle 1.0 flat/1.1 `axes`/2.0 `channels` — decide then whether that's one DTO with optional fields per version or three separate DTOs picked by `version`
 TODO: Parsing — LooksLikeFunscript(ReadOnlySpan<byte> head): cheap probe (JSON + "actions" key)
 TODO: Parsing — Parse(stream, options) -> { Document?, Errors[], Warnings[] }; strict vs lenient(normalize); takes bytes/stream, NEVER a file path
-TODO: Parsing — `ParseTimeSpan(string raw)` helper on `Funscript` (private/internal static) for chapters[].startTime/endTime + bookmarks[].time. CONFIRMED 2026-09-17 by actually running both: `TimeSpan.Parse`/`TryParse` AND `System.ComponentModel.TimeSpanConverter` (same underlying parser) both misread the schema's `^(\d+:)*\d+(\.\d+)?$` format — `"623"` -> 623 DAYS not 623 seconds, `"6:23"` -> 6 HOURS 23 MIN not 6 min 23 sec, `"5.5"` fails/throws outright. Neither is usable as-is. Correct algorithm: split on `:`, last segment = seconds (double, may have a fraction), walking backward: next = whole minutes, next = whole hours; combine as `hours*3600 + minutes*60 + secondsWithFraction` -> `TimeSpan.FromSeconds(total)`. Write-side is NOT symmetric-effort: `TimeSpan.ToString(@"hh\:mm\:ss\.fff")` already round-trips correctly (verified), always emit full HH:MM:SS.fff regardless of input shape — no custom formatter needed, only a custom parser.
 TODO: Parsing — strict = base-1.0 write rules (int ms, unique strictly-increasing at, pos 0-100); lenient coerces float/unsorted/dupe/negative + warnings. TDD against the fixture folders (flat-1.0-minimal -> flat-1.0-full -> lenient/ as a [Theory] -> multi-axis).
 TODO: Query — GetActionAt(TimeSpan) on AxisScript via binary search; return the bracketing pair. Own [Theory]: before-first, after-last, exact hit, between, empty, single.
 TODO: decide whether interpolation lives in Funscript or Engine (FORMAT.md §9)
