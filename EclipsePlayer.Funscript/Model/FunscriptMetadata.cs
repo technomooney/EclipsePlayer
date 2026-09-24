@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Marty Mooney
 // SPDX-License-Identifier: MPL-2.0
 
+using System.Text.Json;
+
 namespace EclipsePlayer.Funscript.Model;
 
 public sealed record FunscriptMetadata
@@ -20,6 +22,7 @@ public sealed record FunscriptMetadata
     public List<string>? Performers { get; init; }
     public List<FunscriptChapter>? Chapters { get; init; }
     public List<FunscriptBookmark>? Bookmarks { get; init; }
+    public Dictionary<string, JsonElement>? UnknownFields { get; init; }
 
 
 
