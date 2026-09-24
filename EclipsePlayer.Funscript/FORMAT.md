@@ -221,8 +221,42 @@ during):
   harder problem, not yet designed), and never applies to `rawActions` (§4.4 —
   deliberately discarded, not preserved).
 
-Not yet built — see the open TODO in `current.todo.md` to design this in depth before
-or alongside the `FunscriptMetadata` extension work.
+**Mechanism (decided 2026-09-24): `System.Text.Json`'s built-in
+`[JsonExtensionDataAttribute]`, not a hand-rolled disjointness check.** Placed on a
+`Dictionary<string, JsonElement>` property, it makes the framework itself sort
+unmapped JSON keys into that dictionary during `Deserialize` and splice them back in
+as top-level properties during `Serialize` — the disjointness invariant above is
+enforced by the BCL, not by code in this library. Constraints confirmed against the
+API docs: the dictionary's value type must be `JsonElement` or `object` (keyed by
+`string`); only one such property is allowed per type (a second throws
+`InvalidOperationException`); it's compatible with a positional-record constructor
+(the extension-data property is populated after construction, not passed as a
+constructor argument).
+
+This can't sit directly on `FunscriptDocument`/`FunscriptMetadata`, since the domain
+model doesn't mirror the wire shape 1:1 (`FunscriptAction.AtMilliSecond`/`ToPosition`
+vs. wire `at`/`pos`, TCode alias resolution, strict/lenient coercion, custom
+`TimeSpan` parsing). Instead: an internal wire-shape DTO (Data Transfer Object) per
+JSON object needing preservation — one for the top level, one for `metadata` — each
+carrying a `[JsonExtensionData] Dictionary<string, JsonElement>? Extra` property.
+`Parse` deserialises into the DTO first (getting the known/unknown split for free),
+hand-maps DTO → domain model as already planned, and carries `Extra` over into the
+domain record's bag field. Write reverses this: hand-build a DTO from the domain
+model (typed fields + the bag merged back into `Extra`) and serialise that.
+
+**Lifetime, verified empirically (2026-09-24):** the concern was whether a
+`JsonElement` captured via `[JsonExtensionData]` stays valid after the call to
+`Deserialize` returns, or is secretly tied to an internal `JsonDocument` that could
+be disposed — the API docs don't say either way. Probe: deserialise JSON with an
+unmapped key into a record using `[JsonExtensionData]`, capture the resulting
+`JsonElement`, drop every other reference (including the deserialised object) and
+force `GC.Collect()` + `GC.WaitForPendingFinalizers()`, then read the captured
+element back. It read correctly — the value is self-contained, not reliant on
+anything the caller needs to keep alive. Safe to hold on a long-lived immutable
+record.
+
+Not yet built — the mechanism above is decided; the DTO shapes and the `Parse`/write
+mapping code are the next implementation step (see `current.todo.md`).
 
 ## 5. Multi-axis
 

@@ -10,6 +10,7 @@ Last updated: 2026-09-24 (first green test — smoke test proves the model graph
 ## DONE this session (2026-09-24)
 
 DONE: First smoke test — `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs`, `TestFunDocWiring`. Hand-built 4 `FunscriptAction`s -> `ImmutableArray.Create` -> `AxisScript` (Stroke) -> `FunscriptMetadata` (object-initializer syntax) -> `FunscriptDocument`. Asserts on `Stroke.Actions.Length`, `Metadata.Creator`, `Metadata.Title`. Passes. Proves the model graph (actions -> axis -> document, with metadata attached) actually holds together end to end. Uncommitted `EclipsePlayer.Funscript.Tests.csproj` `Model\` folder reference now resolves for real.
+DONE: FORMAT.md §4.6 mechanism decided — `[JsonExtensionData]` on an internal wire-shape DTO's `Dictionary<string, JsonElement>? Extra` property, not a hand-rolled known/unknown key split. Confirmed against the API docs: value type must be `JsonElement`/`object` keyed by `string`, only one such property per type, compatible with positional-record constructors (populated post-construction). Lifetime concern (does the captured `JsonElement` survive after `Deserialize` returns, or is it tied to a disposable `JsonDocument`) resolved empirically — ran a throwaway probe (deserialize, capture the element, drop every other reference, force `GC.Collect()`, read it back) and it read correctly. Full writeup in FORMAT.md §4.6. Not built yet — DTO shapes + `Parse`/write mapping code are next, see RESUME HERE.
 
 
 ## DONE previous session (2026-09-17)
@@ -28,7 +29,7 @@ Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the emp
 
 ## RESUME HERE — next single step
 
-TODO: Go over "preserving unrecognised data" in real depth before/alongside building it (see FORMAT.md §4.6, added 2026-09-17 off OFS dev's own unshipped `JsonOther` FIXME). Needs a real design pass, not just the sketch in §4.6: where exactly `UnknownFields` bags live on `FunscriptDocument`/`FunscriptMetadata`, how `Parse` enforces the known/unknown key disjointness invariant, how `Export`/`ToJson` merges them back in, and whether `JsonElement` is the right carrier type or something else fits the immutable-record model better
+TODO: Build the wire-shape DTOs for §4.6 — one for the top-level JSON object, one for `metadata` — each with a `[JsonExtensionData] Dictionary<string, JsonElement>? Extra` property alongside the known fields. Then the DTO -> domain model hand-mapping (carrying `Extra` into the bag field on `FunscriptDocument`/`FunscriptMetadata`) and the reverse for write. Mechanism is decided (see FORMAT.md §4.6); this is the first real implementation of it.
 
 
 ## Then, in order (Funscript model + parser)
