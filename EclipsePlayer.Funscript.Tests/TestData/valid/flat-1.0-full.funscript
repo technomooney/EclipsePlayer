@@ -2,7 +2,6 @@
   "version": "1.0",
   "inverted": false,
   "range": 100,
-  "channel": "stroke",
   "metadata": {
     "creator": "synthetic",
     "title": "full flat sample",
