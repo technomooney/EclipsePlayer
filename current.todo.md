@@ -4,10 +4,19 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-24 (metadata DTO + read-direction mapping built and building clean)
+Last updated: 2026-09-30 (mapper test started, fixtures made full; test has 2 compile errors to fix)
 
 
-## DONE this session (2026-09-24)
+## DONE this session (2026-09-30)
+
+DONE: `EclipsePlayer.Funscript.csproj` — `<InternalsVisibleTo Include="EclipsePlayer.Funscript.Tests" />`, so the test project can see the `internal` DTOs, `MetadataMapper` and `Funscript.ParseTimeSpan`. Committed (0f258e5).
+DONE: `TestData/valid/flat-1.0-full`, `multiaxis-1.1-axes`, `multiaxis-2.0-channels` are now full examples — every known metadata field (all 16 DTO properties), chapters/bookmarks in all three `timeSpan` formats (`M:SS`, `H:MM:SS`, bare seconds), `range` 100, `duration` 5400 / `durationTime` "1:30:00" (consistent with the chapters; `duration` is video length, not script length). The separate chapters fixture was folded in and deleted. README matrix updated.
+DONE: `multiaxis-1.1-axes` ids changed `twist`/`roll` -> `R0`/`R1`: FORMAT.md §5.3 says `axes[].id` is TCode-only on read and strict rejects semantic names.
+DONE: dropped the optional `channel` hint from `flat-1.0-full` (absent from most 1.0 files; untested until the top-level DTO exists).
+STARTED: `EclipsePlayer.Funscript.Tests/Parsing/MetadataMapperTest.cs` (Marty's) — loads `valid/flat-1.0-full.funscript`, pulls out the `metadata` element, deserializes to `FunscriptMetadataDto`, maps via `ToDomain`. Committed mid-way so it syncs to his other machine; does NOT compile yet.
+
+
+## DONE previous session (2026-09-24)
 
 DONE: First smoke test — `EclipsePlayer.Funscript.Tests/Model/FunscriptDocumentTest.cs`, `TestFunDocWiring`. Hand-built 4 `FunscriptAction`s -> `ImmutableArray.Create` -> `AxisScript` (Stroke) -> `FunscriptMetadata` (object-initializer syntax) -> `FunscriptDocument`. Asserts on `Stroke.Actions.Length`, `Metadata.Creator`, `Metadata.Title`. Passes. Proves the model graph (actions -> axis -> document, with metadata attached) actually holds together end to end.
 DONE: FORMAT.md §4.6 mechanism decided — `[JsonExtensionData]` on an internal wire-shape DTO's `Dictionary<string, JsonElement>? Extra` property, not a hand-rolled known/unknown key split. Verified empirically that a captured `JsonElement` survives after the deserialized object and all other references are dropped and a GC is forced — safe to hold on a long-lived immutable record. Full writeup in FORMAT.md §4.6.
@@ -36,7 +45,9 @@ Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the emp
 
 ## RESUME HERE — next single step
 
-TODO: A real test for `MetadataMapper.ToDomain` — deserialize actual JSON (e.g. a string literal with a known key, an unrecognised key, and a `chapters`/`bookmarks` entry) into `FunscriptMetadataDto` via `JsonSerializer.Deserialize`, run it through `ToDomain`, assert the typed fields, the `TimeSpan` conversion, and that the unrecognised key landed in `UnknownFields`. It's only ever been compiled so far, never actually run.
+TODO: Finish `Parsing/MetadataMapperTest.cs` — fix the 2 compile errors: (1) CS8604 at `ToDomain(dto)` — `Deserialize<T>` returns `T?`; add `Assert.NotNull(dto);` on the line before (not `!`), and note `ToDomain!(dto)` is wrong — a `!` on the method name is CS8598; (2) CS1501 `Assert.Collection()` needs the collection first, then one lambda per element. Change the `Duration` assert from `3.0` to `5400.0` (fixtures changed). Then add: `Tags` via `Assert.Equal`, `Chapters`/`Bookmarks` via `Assert.Collection` checking the `TimeSpan`s (6:23 -> 6m23s, 1:02:03 -> 1h2m3s, "623" -> 623s), and a separate `[Fact]` on `valid/unknown-keys-ignored.funscript` asserting `Assert.Contains("unrecognised_meta_key", metadata.UnknownFields!)`. Also worth one test that a fixture with no chapters leaves `Chapters` null (`flat-1.0-minimal`). It's only ever been compiled so far, never actually run.
+TODO: Decide FORMAT.md §5.3 vs §6 contradiction — §6 says the library WRITES `axes[].id` as semantic names, but §5.3 says strict read rejects anything but TCode ids, so the library would emit files its own strict parser rejects. Pick: write TCode ids, or loosen the read rule. Needed before the write path.
+TODO: Top-level DTO decision — `FunscriptDocument` has no `version` field; §4.3 says never branch on `version`, so probably drop it after parsing. Settle when building the top-level DTO.
 TODO: Write-direction mapping — domain `FunscriptMetadata` -> `FunscriptMetadataDto` (merging `UnknownFields` back into `Extra`), for the eventual `Write`/`ToJson` path.
 
 
