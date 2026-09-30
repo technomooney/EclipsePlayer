@@ -19,11 +19,11 @@ emit warnings).
 | file | strict | lenient | exercises |
 |---|---|---|---|
 | `valid/flat-1.0-minimal.funscript` | pass | pass | bare `actions`-only object is valid |
-| `valid/flat-1.0-full.funscript` | pass | pass | every documented wrapper field + metadata |
+| `valid/flat-1.0-full.funscript` | pass | pass | every documented wrapper field + every known metadata field, incl. chapters/bookmarks in all three `timeSpan` formats (`M:SS`, `H:MM:SS`, bare seconds) |
 | `valid/single-action.funscript` | pass | pass | one action |
 | `valid/empty-actions.funscript` | pass (warn) | pass (warn) | empty `actions` array is valid, not an error |
-| `valid/multiaxis-1.1-axes.funscript` | pass | pass | `axes` array, named ids, top-level = stroke |
-| `valid/multiaxis-2.0-channels.funscript` | pass | pass | `channels` object read path |
+| `valid/multiaxis-1.1-axes.funscript` | pass | pass | `axes` array with TCode ids (`R0`/`R1`, per FORMAT.md 5.3), full metadata, top-level = stroke |
+| `valid/multiaxis-2.0-channels.funscript` | pass | pass | `channels` object read path (semantic-name keys), full metadata |
 | `valid/unknown-keys-ignored.funscript` | pass | pass | `rawActions`, unknown top-level key, unknown metadata key all ignored |
 | `valid/tcode-axis-ids.funscript` | pass | pass | `axes[].id` = `R0`/`L1`/`A1` → normalised to `twist`/`surge`/`suck` (§5.6) |
 | `sidecar/scene.funscript` (+ `.roll`, `.twist`) | pass | pass | classic separate-file set; each stream parsed independently, axis name supplied by caller |

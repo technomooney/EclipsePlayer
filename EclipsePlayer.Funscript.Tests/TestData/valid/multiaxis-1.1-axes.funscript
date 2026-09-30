@@ -1,11 +1,33 @@
 {
   "version": "1.1",
   "inverted": false,
-  "range": 90,
-  "metadata": {},
+  "range": 100,
+  "metadata": {
+    "creator": "synthetic",
+    "title": "full 1.1 axes sample",
+    "description": "every known metadata field present",
+    "duration": 1,
+    "durationTime": "0:01",
+    "type": "basic",
+    "notes": "axes ids are TCode on read, per FORMAT.md 5.3",
+    "license": "CC0-1.0",
+    "script_url": "https://example.com/script",
+    "topic_url": "https://example.com/topic",
+    "video_url": "https://example.com/video",
+    "tags": ["test"],
+    "performers": ["performer one", "performer two"],
+    "chapters": [
+      { "name": "minutes-seconds", "startTime": "6:23", "endTime": "12:05" },
+      { "name": "hours-minutes-seconds", "startTime": "1:02:03", "endTime": "1:30:00" }
+    ],
+    "bookmarks": [
+      { "name": "bare-seconds", "time": "623" },
+      { "name": "minutes-seconds", "time": "6:23" }
+    ]
+  },
   "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 60 } ],
   "axes": [
-    { "id": "twist", "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 20 } ] },
-    { "id": "roll",  "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 80 } ] }
+    { "id": "R0", "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 20 } ] },
+    { "id": "R1", "actions": [ { "at": 0, "pos": 50 }, { "at": 1000, "pos": 80 } ] }
   ]
 }
