@@ -4,7 +4,14 @@ Plain-text task list. Actionable lines are prefixed `TODO:` so Rider's TODO tool
 window indexes them (Settings > Editor > File Types: add `*.todo` to "Plain Text"
 if items don't show up; or rename this to `current.todo.md` for zero-config).
 
-Last updated: 2026-09-30 (mapper test started, fixtures made full; test has 2 compile errors to fix)
+Last updated: 2026-10-20 (mapper happy-path tests done and green; unknown-keys + minimal-fixture facts still to write)
+
+
+## DONE this session (2026-10-20)
+
+DONE: `Parsing/MetadataMapperTest.cs` happy path (9079a69) — private static `LoadMetadata(folder, filename)` helper (includes `Assert.NotNull(dto)`), plus 4 facts on `valid/flat-1.0-full`: scalars, tags/performers, chapters, bookmarks (expected lists built with records' value equality; `Assert.Equal` on collections compares element-wise). 5/5 tests green. First time `MetadataMapper.ToDomain` and `ParseTimeSpan` have run against real JSON.
+Decisions: one fact per behavior (not per assert); asserts stay in facts, only the null guard lives in the helper; descriptive names so a red/green run says what broke.
+Noted: `ParseTimeSpan` uses culture-sensitive `double.Parse` — pass `CultureInfo.InvariantCulture` before fractional seconds matter.
 
 
 ## DONE this session (2026-09-30)
@@ -45,7 +52,7 @@ Uncommitted at session end: `EclipsePlayer.Funscript.Tests.csproj` (just the emp
 
 ## RESUME HERE — next single step
 
-TODO: Finish `Parsing/MetadataMapperTest.cs` — fix the 2 compile errors: (1) CS8604 at `ToDomain(dto)` — `Deserialize<T>` returns `T?`; add `Assert.NotNull(dto);` on the line before (not `!`), and note `ToDomain!(dto)` is wrong — a `!` on the method name is CS8598; (2) CS1501 `Assert.Collection()` needs the collection first, then one lambda per element. Change the `Duration` assert from `3.0` to `5400.0` (fixtures changed). Then add: `Tags` via `Assert.Equal`, `Chapters`/`Bookmarks` via `Assert.Collection` checking the `TimeSpan`s (6:23 -> 6m23s, 1:02:03 -> 1h2m3s, "623" -> 623s), and a separate `[Fact]` on `valid/unknown-keys-ignored.funscript` asserting `Assert.Contains("unrecognised_meta_key", metadata.UnknownFields!)`. Also worth one test that a fixture with no chapters leaves `Chapters` null (`flat-1.0-minimal`). It's only ever been compiled so far, never actually run.
+TODO: Finish `Parsing/MetadataMapperTest.cs` — happy path is done. Still to write: (1) a `[Fact]` on `valid/unknown-keys-ignored.funscript` asserting `Assert.Contains("unrecognised_meta_key", metadata.UnknownFields!)`; (2) a `[Fact]` on `valid/flat-1.0-minimal.funscript` asserting optional fields (`Chapters`, `Bookmarks`, `Type`, `Notes`, ...) are null via `Assert.Null`. Also optional: swap `ReadAllTextAsync(...).Result` in the helper for `File.ReadAllText`.
 TODO: Decide FORMAT.md §5.3 vs §6 contradiction — §6 says the library WRITES `axes[].id` as semantic names, but §5.3 says strict read rejects anything but TCode ids, so the library would emit files its own strict parser rejects. Pick: write TCode ids, or loosen the read rule. Needed before the write path.
 TODO: Top-level DTO decision — `FunscriptDocument` has no `version` field; §4.3 says never branch on `version`, so probably drop it after parsing. Settle when building the top-level DTO.
 TODO: Write-direction mapping — domain `FunscriptMetadata` -> `FunscriptMetadataDto` (merging `UnknownFields` back into `Extra`), for the eventual `Write`/`ToJson` path.
