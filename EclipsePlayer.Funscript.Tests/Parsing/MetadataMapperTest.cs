@@ -39,7 +39,7 @@ public class MetadataMapperTest
     public void TestMetadataListsValid()
     {
         var validFunscriptMetadataObj = LoadMetadata("valid", "flat-1.0-full.funscript");
-        List<string>? expectedTagsList = ["test"];
+        List<string> expectedTagsList = ["test"];
         Assert.Equal(expectedTagsList, validFunscriptMetadataObj.Tags);
 
         List<string> expectedPerformers = new List<string> { "performer one", "performer two" };
@@ -69,4 +69,25 @@ public class MetadataMapperTest
         Assert.Equal(expectedBookmarksList, validFunscriptMetadataObj.Bookmarks);
     }
 
+    [Fact]
+    public void TestMetadataNullableNull()
+    {
+        var validNullFunscriptMetadataObj = MetadataMapper.ToDomain(new FunscriptMetadataDto());
+        Assert.Null(validNullFunscriptMetadataObj.Creator);
+        Assert.Null(validNullFunscriptMetadataObj.Title);
+        Assert.Null(validNullFunscriptMetadataObj.Description);
+        Assert.Null(validNullFunscriptMetadataObj.Duration);
+        Assert.Null(validNullFunscriptMetadataObj.DurationTime);
+        Assert.Null(validNullFunscriptMetadataObj.Type);
+        Assert.Null(validNullFunscriptMetadataObj.Notes);
+        Assert.Null(validNullFunscriptMetadataObj.License);
+        Assert.Null(validNullFunscriptMetadataObj.ScriptUrl);
+        Assert.Null(validNullFunscriptMetadataObj.TopicUrl);
+        Assert.Null(validNullFunscriptMetadataObj.VideoUrl);
+        Assert.Null(validNullFunscriptMetadataObj.Tags);
+        Assert.Null(validNullFunscriptMetadataObj.Performers);
+        Assert.Null(validNullFunscriptMetadataObj.Chapters);
+        Assert.Null(validNullFunscriptMetadataObj.Bookmarks);
+        Assert.Null(validNullFunscriptMetadataObj.UnknownFields);
+    }
 }
