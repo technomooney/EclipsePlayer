@@ -90,4 +90,20 @@ public class MetadataMapperTest
         Assert.Null(validNullFunscriptMetadataObj.Bookmarks);
         Assert.Null(validNullFunscriptMetadataObj.UnknownFields);
     }
+
+    [Fact]
+    public void TestUnknownKeysPreserved()
+    {
+        var validFunscriptMetadataObj = LoadMetadata("valid", "unknown-keys-ignored.funscript");
+        Assert.NotNull(validFunscriptMetadataObj.UnknownFields);
+        Assert.Single(validFunscriptMetadataObj.UnknownFields);
+        Assert.Contains("unrecognised_meta_key",  validFunscriptMetadataObj.UnknownFields);
+        Assert.DoesNotContain("creator",validFunscriptMetadataObj.UnknownFields);
+        Assert.Equal("x", validFunscriptMetadataObj.Creator);
+        Assert.Equal(JsonValueKind.Array , validFunscriptMetadataObj.UnknownFields["unrecognised_meta_key"].ValueKind);
+        Assert.Equal(3, validFunscriptMetadataObj.UnknownFields["unrecognised_meta_key"].GetArrayLength());
+        List<int> expectedUnknownJsonElementData = [1, 2, 3];
+        var deserialisedJsonElement = validFunscriptMetadataObj.UnknownFields["unrecognised_meta_key"].Deserialize<List<int>>();
+        Assert.Equal(expectedUnknownJsonElementData, deserialisedJsonElement);
+    }
 }
