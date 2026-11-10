@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using EclipsePlayer.Funscript.Model;
+using EclipsePlayer.Funscript.Parsing;
 using EclipsePlayer.Funscript.Parsing.Dto;
 
 namespace EclipsePlayer.Funscript.Tests.Parsing;
@@ -92,7 +93,7 @@ public class MetadataMapperTest
     }
 
     [Fact]
-    public void TestUnknownKeysPreserved()
+    public void TestUnknownMetadataKeysPreserved()
     {
         var validFunscriptMetadataObj = LoadMetadata("valid", "unknown-keys-ignored.funscript");
         Assert.NotNull(validFunscriptMetadataObj.UnknownFields);

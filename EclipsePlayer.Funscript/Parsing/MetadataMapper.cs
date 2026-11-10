@@ -3,8 +3,10 @@
 
 using System.Linq;
 using EclipsePlayer.Funscript.Model;
+using EclipsePlayer.Funscript.Parsing.Dto;
 
-namespace EclipsePlayer.Funscript.Parsing.Dto;
+
+namespace EclipsePlayer.Funscript.Parsing;
 
 internal static class MetadataMapper
 {
