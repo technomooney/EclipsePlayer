@@ -142,7 +142,7 @@ warnings describing what was changed.
 | input deviation | action |
 |---|---|
 | `at` is a float | round to nearest ms |
-| `pos` is a float | round, then clamp 0–100 |
+| `pos` is a float | **still an error** — `pos` is read as an integer, so a fractional value fails parsing in both modes (`at` is the only field with float recovery) |
 | `pos` outside 0–100 | clamp |
 | actions out of order | stable sort by `at` |
 | duplicate `at` | keep the **last** occurrence (later entry wins) |
